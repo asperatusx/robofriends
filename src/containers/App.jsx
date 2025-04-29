@@ -1,55 +1,38 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import CardList from "../components/CardList";
 import SearchBox from "../components/SearchBox";
 import "./App.css";
 import Scroll from "../components/Scroll";
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      robots: [],
-      searchfield: "",
-    };
+function App() {
+  const [robots, setRobots] = useState([]);
+  const [searchfield, setSearchfield] = useState('');
 
-    this.onSearchChange = this.onSearchChange.bind(this);
-  }
-
-  // Simulating an API call to fetch robots data
-  componentDidMount() {
+  useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => {
-        return response.json();
-      })
-      .then((users) => {
-        this.setState({ robots: users });
-      });
+      .then(response => response.json())
+      .then(users => setRobots(users))
+  }, [])
+
+  const filteredRobots = robots.filter((robot) => {
+    return robot.name.toLowerCase().includes(searchfield.toLowerCase());
+  });
+
+  function onSearchChange(e) {
+    setSearchfield(e.target.value)
   }
 
-  onSearchChange(event) {
-    this.setState({ searchfield: event.target.value }, () => {
-      console.log(this.state.robots);
-    });
-  }
-
-  render() {
-    const { robots, searchfield } = this.state;
-    const filteredRobots = robots.filter((robot) => {
-      return robot.name.toLowerCase().includes(searchfield.toLowerCase());
-    });
-
-    return !robots.length ? (
-      <h1>Loading</h1>
-    ) : (
-      <div className="tc">
-        <h1 className="f2">RoboFriends</h1>
-        <SearchBox searchChange={this.onSearchChange} />
-        <Scroll>
-          <CardList robots={filteredRobots} />
-        </Scroll>
-      </div>
-    );
-  }
+  return !robots.length ? (
+    <h1>Loading</h1>
+  ) : (
+    <div className="tc">
+      <h1 className="f2">RoboFriends</h1>
+      <SearchBox searchChange={onSearchChange} />
+      <Scroll>
+        <CardList robots={filteredRobots} />
+      </Scroll>
+    </div>
+  );
 }
 
 export default App;
